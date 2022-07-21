@@ -5,6 +5,7 @@ import androidx.cardview.widget.CardView;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
 
 import com.example.trivia.controller.AppController;
 import com.example.trivia.data.AnswerListAsyncResponse;
@@ -28,13 +32,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView questiontextview;
     private TextView questioncountertextview;
+    private TextView scoretextview;
+    private TextView LastGameScore;
     private Button TrueButton;
     private Button FalseButton;
     private ImageButton NextButton;
     private ImageButton PrevButton;
 
+
     private int currentQuestionIndex = 0;
+    private int score = 0 ;
     private List<Question> questionList ;
+
+
+    private static final String Messasge_ID = "myscore";
+
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +63,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FalseButton = findViewById(R.id.false_button);
 
         questioncountertextview = findViewById(R.id.counter_text);
-        questiontextview = findViewById(R.id.question_textview);
+        questiontextview        = findViewById(R.id.question_textview);
+        scoretextview           = findViewById(R.id.scoretext);
+        LastGameScore           = findViewById(R.id.LastGameScore);
 
 
         NextButton.setOnClickListener(this);
         PrevButton.setOnClickListener(this);
         TrueButton.setOnClickListener(this);
         FalseButton.setOnClickListener(this);
+
+        SharedPreferences getshare = getSharedPreferences(Messasge_ID,MODE_PRIVATE);
+
+
+        int LastScore = getshare.getInt("score",1000);
+
+
+
+        LastGameScore.setText("Last Game Score : " + LastScore);
+
+
+
+
 
 
 
@@ -83,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+
+
 
         switch (view.getId()){
 
@@ -118,6 +151,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void checkAnswer(boolean userChooseCorrect) {
 
+        SharedPreferences sharedPreferences = getSharedPreferences(Messasge_ID,MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+
         boolean answerIsTrue = questionList.get(currentQuestionIndex).isAnswerTrue();
 
         int toastMessageID  ;
@@ -128,7 +165,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             updatequestion();
             toastMessageID = R.string.correct_answer;
 
+                score++;
+                scoretextview.setText("score : "+ (score));
+                editor.putInt("score", score);
+                editor.apply();
+
+
+
+
         }else {
+            if(score > 0){
+                score--;
+                scoretextview.setText("score : "+ (score));
+                editor.putInt("score", score);
+                editor.apply();
+
+            }
             toastMessageID = R.string.wrong_answer;
         }
 
